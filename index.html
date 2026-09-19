@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Tickets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4f3ef;
+    --paper-deep:#eae8e1;
+    --ink:#201f1c;
+    --ink-soft:#5c5a54;
+    --line:#d8d5cc;
+    --claro:#da291c;
+    --claro-deep:#a81f15;
+    --steel:#3d4a56;
+    --steel-soft:#eef1f3;
+    --ok:#1f7a4d;
+    --ok-bg:#e6f4ec;
+    --headerbg:#171512;
+    --card:#ffffff;
+    --radius:14px;
+  }
+  body[data-theme="dark"]{
+    --paper:#1b1916;
+    --paper-deep:#242119;
+    --ink:#f3f1ea;
+    --ink-soft:#b5b0a4;
+    --line:#3a362e;
+    --card:#242119;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(180deg, transparent 0 39px, rgba(0,0,0,.025) 39px 40px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter', system-ui, -apple-system, sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px;}
+
+  /* ===== HEADER / LOGO ===== */
+  header.top{
+    padding:18px 16px 16px;
+    background:var(--headerbg);
+    color:#fff;
+  }
+  .brandrow{
+    max-width:640px;margin:0 auto;
+    display:flex;align-items:center;justify-content:flex-start;gap:14px;
+  }
+  .brand-mark{display:flex;align-items:center;gap:10px;}
+  .claro-badge{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--claro);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 2px rgba(255,255,255,.15) inset;
+  }
+  .claro-badge span{
+    font-family:'Barlow Condensed',sans-serif;
+    font-style:italic;font-weight:700;font-size:.72rem;color:#fff;letter-spacing:.5px;
+  }
+  .claro-word{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.5px;}
+
+  .titlebar{
+    max-width:640px;margin:14px auto 0;
+    display:flex;align-items:baseline;justify-content:space-between;
+  }
+  .titlebar h1{
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1.5rem;font-weight:700;letter-spacing:.3px;margin:0;color:#fff;
+  }
+  .titlebar .stamp{
+    font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:#c9c6bd;
+    border:1px solid rgba(255,255,255,.25);padding:3px 8px;border-radius:20px;
+  }
+  .header-actions{display:flex;gap:6px;}
+
+  /* ===== HOME GRID ===== */
+  .home-grid{
+    display:flex;flex-direction:column;gap:12px;
+    margin-top:18px;
+  }
+  .func-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 14px;
+    text-align:left;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    transition:transform .12s, box-shadow .12s;
+  }
+  .func-card:active{transform:scale(.97);}
+  .func-card::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--claro);
+  }
+  .func-card h3{
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1.15rem;font-weight:700;margin:0 0 6px;color:var(--ink);
+  }
+  .func-card p{font-size:.76rem;color:var(--ink-soft);margin:0;line-height:1.3;}
+
+  /* ===== FUNCTION VIEW ===== */
+  .func-view{display:none;margin-top:18px;}
+  .func-view.active{display:block;}
+  .back-btn{
+    background:none;border:none;color:var(--ink-soft);font-size:.85rem;
+    display:flex;align-items:center;gap:6px;padding:8px 0;cursor:pointer;font-weight:500;
+  }
+  .back-btn:active{opacity:.6;}
+
+  .ticket{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 18px;position:relative;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  .ticket-head{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;
+  }
+  .ticket-head h2{
+    font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:700;margin:0;
+  }
+  .step-count{
+    font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--ink-soft);
+  }
+
+  .progress{
+    display:flex;gap:4px;margin-bottom:18px;
+  }
+  .progress i{
+    flex:1;height:3px;background:var(--line);border-radius:2px;
+  }
+  .progress i.done{background:var(--claro);}
+
+  .answered-list{
+    display:flex;flex-direction:column;gap:6px;margin-bottom:16px;
+  }
+  .answered-item{
+    display:flex;justify-content:space-between;gap:10px;
+    font-size:.78rem;padding:7px 10px;background:var(--paper);border-radius:8px;
+    border:1px dashed var(--line);
+  }
+  .answered-item b{color:var(--ink-soft);font-weight:600;min-width:38%;}
+  .answered-item span{
+    font-family:'IBM Plex Mono',monospace;color:var(--ink);text-align:right;word-break:break-word;
+  }
+
+  .q-label{
+    font-size:.78rem;color:var(--claro-deep);font-weight:600;
+    text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;
+  }
+  .q-text{
+    font-size:1.05rem;font-weight:500;margin-bottom:12px;line-height:1.35;
+  }
+  input[type=text], input[type=number], textarea{
+    width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:10px;
+    font-size:1rem;font-family:'Inter',sans-serif;color:var(--ink);background:var(--paper);
+    outline:none;transition:border-color .15s;
+  }
+  input[type=text]:focus, input[type=number]:focus, textarea:focus{border-color:var(--claro);background:var(--card);}
+  textarea{resize:vertical;min-height:90px;font-family:'Inter',sans-serif;line-height:1.4;}
+
+  .fmt-warn{display:none;font-size:.74rem;color:var(--claro-deep);margin-top:6px;line-height:1.35;}
+  .fmt-warn.show{display:block;}
+  .opt-note{font-size:.74rem;color:var(--ink-soft);margin-top:6px;line-height:1.35;}
+
+  .chip-repeat{
+    display:inline-flex;align-items:center;gap:5px;
+    background:var(--steel-soft);color:var(--steel);border:none;
+    font-size:.76rem;font-weight:600;padding:8px 12px;border-radius:20px;
+    margin-top:10px;width:auto;
+  }
+
+  .draft-banner{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    background:var(--ok-bg);color:var(--ok);border-radius:8px;
+    font-size:.76rem;padding:8px 10px;margin-bottom:14px;
+  }
+  .draft-banner button{
+    background:none;border:none;color:var(--ok);text-decoration:underline;
+    font-size:.72rem;font-weight:600;padding:2px;width:auto;
+  }
+
+  .btnrow{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  button{
+    font-family:'Inter',sans-serif;cursor:pointer;border:none;border-radius:10px;
+    font-weight:600;font-size:.92rem;padding:13px 16px;transition:opacity .12s, transform .08s;
+  }
+  button:active{transform:scale(.98);}
+  .btn-primary{background:var(--claro);color:#fff;flex:1;}
+  .btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
+  .btn-outline{background:var(--card);color:var(--ink);border:1.5px solid var(--line);}
+
+  /* ===== FINAL REPORT ===== */
+  .report-box{
+    background:#1b1a17;color:#f4f3ef;border-radius:10px;padding:16px;
+    font-family:'IBM Plex Mono',monospace;font-size:.86rem;line-height:1.6;
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .report-box b{color:var(--claro);font-weight:700;}
+
+  .toast{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+    background:#171512;color:#fff;padding:10px 18px;border-radius:30px;font-size:.82rem;
+    opacity:0;pointer-events:none;transition:opacity .2s, bottom .2s;z-index:50;
+  }
+  .toast.show{opacity:1;bottom:26px;}
+
+  .hint{font-size:.74rem;color:var(--ink-soft);margin-top:8px;line-height:1.4;}
+
+  /* ===== SOBRE (modal) ===== */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(20,18,16,.6);
+    align-items:center;justify-content:center;padding:20px;z-index:100;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--card);border-radius:16px;padding:26px 22px;max-width:420px;width:100%;
+    position:relative;box-shadow:0 20px 50px rgba(0,0,0,.25);
+  }
+  .modal-close{
+    position:absolute;top:12px;right:12px;background:var(--paper);border:none;
+    width:30px;height:30px;border-radius:50%;font-size:.85rem;color:var(--ink-soft);
+  }
+  .modal-badge{
+    display:inline-block;background:var(--steel-soft);color:var(--steel);
+    font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+    padding:4px 10px;border-radius:20px;margin-bottom:10px;
+  }
+  .modal-box h2{
+    font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:700;margin:0 0 10px;
+  }
+  .modal-box p{font-size:.9rem;line-height:1.55;color:var(--ink-soft);margin:0;}
+
+  .hist-item{
+    border:1px dashed var(--line);border-radius:10px;padding:10px;
+    margin-bottom:10px;background:var(--paper);
+  }
+  .hist-meta{display:flex;justify-content:space-between;gap:8px;font-size:.7rem;color:var(--ink-soft);margin-bottom:4px;}
+  .hist-preview{
+    font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--ink);
+    white-space:pre-wrap;word-break:break-word;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brandrow">
+    <div class="brand-mark">
+      <div class="claro-badge"><span>claro</span></div>
+      <div class="claro-word">Claro</div>
+    </div>
+  </div>
+  <div class="titlebar">
+    <h1>Tickets</h1>
+    <div class="header-actions">
+      <button class="stamp" onclick="alternarTema()" id="temaBtn" style="cursor:pointer;">Escuro</button>
+      <button class="stamp" onclick="abrirHistorico()" style="cursor:pointer;">Histórico</button>
+      <button class="stamp" onclick="abrirSobre()" style="cursor:pointer;">Sobre</button>
+    </div>
+  </div>
+</header>
+
+<div class="modal-overlay" id="sobreOverlay" onclick="if(event.target===this) fecharSobre()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="fecharSobre()">✕</button>
+    <div class="modal-badge">Sobre esta página</div>
+    <h2>Idealizada por Lucas Ricardo</h2>
+    <p>Página complementar criada por Lucas Ricardo, técnico de campo, para padronizar textos de fechamento, validação de sinais, encaminhamento de rede externa, problema elétrico, outage, alocação de ticket, tentativa de acesso e baixa improcedente — prontos para copiar e colar.</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="historicoOverlay" onclick="if(event.target===this) fecharHistorico()">
+  <div class="modal-box" style="max-height:78vh;overflow:auto;">
+    <button class="modal-close" onclick="fecharHistorico()">✕</button>
+    <div class="modal-badge">Histórico</div>
+    <h2>Últimos relatórios</h2>
+    <div id="historicoLista"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <div id="home" class="home-grid">
+    <button class="func-card" onclick="abrirFuncao('fechamento')">
+      <h3>Fechamento</h3>
+      <p>Ticket, cód. baixa, descrição do fechamento</p>
+    </button>
+    <button class="func-card" onclick="abrirFuncao('validacao_sinais')">
+      <h3>Validação de Sinais</h3>
+      <p>Nome, ticket</p>
+    </button>
+    <button class="func-card" onclick="abrirFuncao('rede_externa')">
+      <h3>Encaminhar Rede Externa</h3>
+      <p>Líder, ticket, TAP, níveis de sinal (CA/CB/TX/RX)</p>
+    </button>
+    <button class="func-card" onclick="abrirFuncao('problema_eletrico')">
+      <h3>Problema Elétrico</h3>
+      <p>Ticket, paliativo, previsão, contato responsável</p>
+    </button>
+    <button class="func-card" onclick="abrirFuncao('pedido_outage')">
+      <h3>Pedido de Outage</h3>
+      <p>Nome, telefone, contrato, atuação</p>
+    </button>
+    <button class="func-card" onclick="abrirFuncao('alocar_ticket')">
+      <h3>Solicitação de Ticket</h3>
+      <p>Alocar — nome, login, ticket</p>
+    </button>
+    <button class="func-card" onclick="abrirFuncao('tentativa_acesso')">
+      <h3>Tentativa de Acesso</h3>
+      <p>Técnico, ticket, níveis de sinal (CA/CB/TX/RX)</p>
+    </button>
+    <button class="func-card" onclick="abrirFuncao('rede_externa_gpon')">
+      <h3>Rede Externa GPON</h3>
+      <p>Incidente, endereço, abrangência, fibra</p>
+    </button>
+    <button class="func-card" onclick="abrirFuncao('baixa_improcedente')">
+      <h3>Baixa Improcedente 204/217</h3>
+      <p>Ticket, técnico, observação</p>
+    </button>
+    <button class="func-card" onclick="abrirFuncao('sem_acesso_agendamento')">
+      <h3>Sem Acesso com Agendamento</h3>
+      <p>Técnico, ticket, OTG agendado, contato, níveis de sinal (CA/CB/TX/RX)</p>
+    </button>
+  </div>
+
+  <!-- FUNCTION VIEWS -->
+  <div id="view-fechamento" class="func-view"></div>
+  <div id="view-validacao_sinais" class="func-view"></div>
+  <div id="view-rede_externa" class="func-view"></div>
+  <div id="view-problema_eletrico" class="func-view"></div>
+  <div id="view-pedido_outage" class="func-view"></div>
+  <div id="view-alocar_ticket" class="func-view"></div>
+  <div id="view-tentativa_acesso" class="func-view"></div>
+  <div id="view-rede_externa_gpon" class="func-view"></div>
+  <div id="view-baixa_improcedente" class="func-view"></div>
+  <div id="view-sem_acesso_agendamento" class="func-view"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ CONFIG ============ */
+function abrirSobre(){ document.getElementById('sobreOverlay').classList.add('show'); }
+function fecharSobre(){ document.getElementById('sobreOverlay').classList.remove('show'); }
+
+/* ---- Tema claro/escuro ---- */
+function aplicarTema(){
+  let tema = 'claro';
+  try{ tema = localStorage.getItem('tema_tickets') || 'claro'; }catch(e){}
+  document.body.setAttribute('data-theme', tema==='escuro' ? 'dark' : 'light');
+  const btn = document.getElementById('temaBtn');
+  if(btn) btn.textContent = tema==='escuro' ? 'Claro' : 'Escuro';
+}
+function alternarTema(){
+  let tema = 'claro';
+  try{ tema = localStorage.getItem('tema_tickets') || 'claro'; }catch(e){}
+  tema = tema==='escuro' ? 'claro' : 'escuro';
+  try{ localStorage.setItem('tema_tickets', tema); }catch(e){}
+  aplicarTema();
+}
+
+/* ---- Histórico de relatórios gerados ---- */
+let historicoAtual = [];
+function salvarHistorico(tipo, texto){
+  try{
+    let hist = JSON.parse(localStorage.getItem('historico_relatorios_tickets') || '[]');
+    if(hist.length && hist[0].texto===texto && hist[0].tipo===tipo) return;
+    hist.unshift({tipo, texto, data:new Date().toLocaleString('pt-BR')});
+    hist = hist.slice(0,20);
+    localStorage.setItem('historico_relatorios_tickets', JSON.stringify(hist));
+  }catch(e){}
+}
+function abrirHistorico(){
+  try{ historicoAtual = JSON.parse(localStorage.getItem('historico_relatorios_tickets') || '[]'); }catch(e){ historicoAtual = []; }
+  const lista = document.getElementById('historicoLista');
+  lista.innerHTML = historicoAtual.length ? historicoAtual.map((h,i)=>`
+    <div class="hist-item">
+      <div class="hist-meta"><b>${esc(h.tipo)}</b><span>${esc(h.data)}</span></div>
+      <div class="hist-preview">${esc(h.texto.slice(0,90))}${h.texto.length>90?'…':''}</div>
+      <button class="btn-outline hist-copy" style="width:100%;margin-top:6px;" data-idx="${i}">Copiar</button>
+    </div>
+  `).join('') : '<p style="font-size:.85rem;color:var(--ink-soft);">Nenhum relatório gerado ainda.</p>';
+  lista.querySelectorAll('.hist-copy').forEach(btn=>{
+    btn.addEventListener('click', ()=> copiar(historicoAtual[+btn.dataset.idx].texto));
+  });
+  document.getElementById('historicoOverlay').classList.add('show');
+}
+function fecharHistorico(){ document.getElementById('historicoOverlay').classList.remove('show'); }
+
+/* ---- Rascunho automático ---- */
+function salvarRascunho(key){
+  try{ localStorage.setItem('rascunho_tickets_'+key, JSON.stringify({values:state[key].values})); }catch(e){}
+}
+function carregarRascunho(key){
+  try{ const raw = localStorage.getItem('rascunho_tickets_'+key); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+function limparRascunho(key){
+  try{ localStorage.removeItem('rascunho_tickets_'+key); }catch(e){}
+}
+function descartarRascunho(key){
+  limparRascunho(key);
+  state[key] = {values:{}, step:'perguntas'};
+  renderPerguntas(key);
+}
+
+/* ---- Repetir TÉCNICO/LOGIN ---- */
+const REPETIVEIS = ['tecnico','login'];
+function obterUltimos(){
+  try{ return JSON.parse(localStorage.getItem('ultimos_valores_tickets') || '{}'); }catch(e){ return {}; }
+}
+function salvarUltimo(k,v){
+  try{ const uv = obterUltimos(); uv[k]=v; localStorage.setItem('ultimos_valores_tickets', JSON.stringify(uv)); }catch(e){}
+}
+function repetirValor(key, campoKey){
+  const uv = obterUltimos();
+  const val = uv[campoKey];
+  if(!val) return;
+  state[key].values[campoKey] = val;
+  salvarRascunho(key);
+  renderPerguntas(key);
+}
+
+/* ---- Validação leve de formato ---- */
+function avisoFormato(campoKey, valor){
+  if(!valor) return '';
+  if(campoKey==='contrato'){
+    return /^\d+(\/\d+)?$/.test(valor) ? '' : 'Formato incomum — normalmente só números (ex: 1064248 ou 56/3650460)';
+  }
+  return '';
+}
+
+const NOMES = {
+  fechamento:'Fechamento',
+  validacao_sinais:'Validação de Sinais',
+  rede_externa:'Encaminhar Rede Externa',
+  problema_eletrico:'Problema Elétrico',
+  pedido_outage:'Pedido de Outage',
+  alocar_ticket:'Solicitação de Ticket',
+  tentativa_acesso:'Tentativa de Acesso',
+  rede_externa_gpon:'Rede Externa GPON',
+  baixa_improcedente:'Baixa Improcedente',
+  sem_acesso_agendamento:'Sem Acesso com Agendamento'
+};
+
+const CHAVES = Object.keys(NOMES);
+
+const state = {}; // por função: {values, step}
+CHAVES.forEach(k=>{
+  state[k] = {values:{}, step:'perguntas'};
+});
+
+/* ============ HELPERS ============ */
+function f(key,label,pergunta,tipo,opcional){ return {key,label,pergunta,tipo:tipo||'text',opcional:!!opcional}; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function copiar(texto){
+  function copiarFallback(){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = texto;
+      ta.style.position = 'fixed';
+      ta.style.top = '-9999px';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast(ok ? 'Texto copiado!' : 'Não foi possível copiar');
+    }catch(e){
+      toast('Não foi possível copiar');
+    }
+  }
+
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(()=>toast('Texto copiado!')).catch(copiarFallback);
+  }else{
+    copiarFallback();
+  }
+}
+
+/* ============ NAVEGAÇÃO ============ */
+function abrirFuncao(key){
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('view-'+key).classList.add('active');
+  const draft = carregarRascunho(key);
+  if(draft && draft.values && Object.keys(draft.values).length){
+    state[key].values = draft.values;
+    state[key]._recuperado = true;
+  }
+  renderPerguntas(key);
+}
+function voltarHome(key){
+  limparRascunho(key);
+  state[key] = {values:{}, step:'perguntas'};
+  document.getElementById('view-'+key).classList.remove('active');
+  document.getElementById('view-'+key).innerHTML = '';
+  document.getElementById('home').style.display = 'flex';
+}
+
+/* ============ FLUXOS (uma pergunta por vez) ============ */
+const FLOWS = {
+  fechamento(v){
+    if(!v.tecnico) return f('tecnico','Técnico','Qual o nome do técnico responsável?');
+    if(!v.ticket) return f('ticket','Ticket','Qual o número do TICKET?');
+    if(!v.cod_baixa) return f('cod_baixa','Cod_Baixa','Qual o COD_BAIXA?');
+    if(!v.descricao) return f('descricao','Descrição do Fechamento','Qual a DESCRIÇÃO DO FECHAMENTO?','area');
+    return null;
+  },
+  validacao_sinais(v){
+    if(!v.nome) return f('nome','Nome','Qual o NOME?');
+    if(!v.ticket) return f('ticket','Ticket','Qual o número do TICKET?');
+    return null;
+  },
+  rede_externa(v){
+    if(!v.lider) return f('lider','Lider','Qual o nome do LÍDER?');
+    if(!v.ticket) return f('ticket','Ticket','Qual o número do TICKET?');
+    if(!v.telefone) return f('telefone','Telefone','Qual o TELEFONE de contato?');
+    if(!v.tap) return f('tap','TAP','Qual o TAP?');
+    if(!v.ca) return f('ca','CA','Qual o nível de CA?');
+    if(!v.cb) return f('cb','CB','Qual o nível de CB?');
+    if(!v.tx) return f('tx','TX','Qual o nível de TX?');
+    if(!v.rx) return f('rx','RX','Qual o nível de RX?');
+    if(v.mer===undefined) return f('mer','MER','Qual o MER?','text',true);
+    if(v.ber===undefined) return f('ber','BER','Qual o BER?','text',true);
+    return null;
+  },
+  problema_eletrico(v){
+    if(!v.nome) return f('nome','Nome','Qual o NOME?');
+    if(!v.ticket) return f('ticket','Ticket','Qual o número do TICKET?');
+    if(!v.paliativo) return f('paliativo','Paliativo','Qual a medida PALIATIVA aplicada?','area');
+    if(!v.previsao) return f('previsao','Previsão','Qual a PREVISÃO de normalização?');
+    if(!v.contato) return f('contato','Contato responsável','Qual o CONTATO RESPONSÁVEL?');
+    return null;
+  },
+  pedido_outage(v){
+    if(!v.nome) return f('nome','Nome','Qual o NOME?');
+    if(!v.telefone) return f('telefone','Telefone','Qual o TELEFONE?');
+    if(!v.contrato) return f('contrato','Contrato','Qual o CONTRATO?');
+    if(!v.atuacao) return f('atuacao','Atuação','Qual a ATUAÇÃO?');
+    return null;
+  },
+  alocar_ticket(v){
+    if(!v.nome) return f('nome','Nome','Qual o NOME?');
+    if(!v.login) return f('login','Login','Qual o LOGIN?');
+    if(!v.ticket) return f('ticket','Ticket','Qual o número do TICKET?');
+    return null;
+  },
+  tentativa_acesso(v){
+    if(!v.tecnico) return f('tecnico','Técnico','Qual o nome do técnico responsável?');
+    if(!v.ticket) return f('ticket','Ticket','Qual o número do TICKET?');
+    if(!v.ca) return f('ca','CA','Qual o nível de CA?');
+    if(!v.cb) return f('cb','CB','Qual o nível de CB?');
+    if(!v.tx) return f('tx','TX','Qual o nível de TX?');
+    if(!v.rx) return f('rx','RX','Qual o nível de RX?');
+    return null;
+  },
+  rede_externa_gpon(v){
+    if(!v.nome) return f('nome','Nome','Qual o NOME?');
+    if(!v.incidente) return f('incidente','Incidente','Qual o número do INCIDENTE?');
+    if(!v.telefone) return f('telefone','Telefone','Qual o TELEFONE?');
+    if(!v.endereco) return f('endereco','Endereço e identificação da caixa M','Qual o ENDEREÇO e a IDENTIFICAÇÃO DA CAIXA M?');
+    if(!v.baixa) return f('baixa','Baixa','Qual o código de BAIXA?');
+    if(!v.abrangencia) return f('abrangencia','Abrangência','Qual a ABRANGÊNCIA? (responda MDU ou MDU E VIZINHOS)');
+    if(!v.grupo_fibra) return f('grupo_fibra','Grupo e cor da fibra com a medição','Qual o GRUPO E COR DA FIBRA, com a medição?');
+    return null;
+  },
+  baixa_improcedente(v){
+    if(!v.ticket) return f('ticket','Ticket','Qual o número do TICKET?');
+    if(!v.tecnico) return f('tecnico','Tecnico','Qual o nome do técnico responsável?');
+    if(!v.observacao) return f('observacao','Observação','Qual a OBSERVAÇÃO?','area');
+    return null;
+  },
+  sem_acesso_agendamento(v){
+    if(!v.tecnico) return f('tecnico','Técnico','Qual o nome do técnico responsável?');
+    if(!v.ticket) return f('ticket','Ticket','Qual o número do TICKET?');
+    if(!v.otg) return f('otg','Otg agendado para','Para quando foi agendado o OTG?');
+    if(!v.contato) return f('contato','Contato','Qual o CONTATO?');
+    if(!v.ca) return f('ca','CA','Qual o nível de CA?');
+    if(!v.cb) return f('cb','CB','Qual o nível de CB?');
+    if(!v.tx) return f('tx','TX','Qual o nível de TX?');
+    if(!v.rx) return f('rx','RX','Qual o nível de RX?');
+    return null;
+  }
+};
+
+const TOTAL_CAMPOS = {
+  fechamento:4, validacao_sinais:2, rede_externa:10, problema_eletrico:5,
+  pedido_outage:4, alocar_ticket:3, tentativa_acesso:6, rede_externa_gpon:7,
+  baixa_improcedente:3, sem_acesso_agendamento:8
+};
+
+const TEMPLATES = {
+  fechamento(v){
+    return `Solicitação: FECHAMENTO\nTécnico: ${v.tecnico}\nTicket: ${v.ticket}\nCod_Baixa: ${v.cod_baixa}\nDescrição do Fechamento: ${v.descricao}`;
+  },
+  validacao_sinais(v){
+    return `*VALIDAÇÃO DE SINAIS*\nSolicitação: VALIDAÇÃO DE SINAIS\nNome: ${v.nome}\nTicket: ${v.ticket}`;
+  },
+  rede_externa(v){
+    const linhas = [
+      'Solicitação: #ENCAMINHAR REDE EXTERNA#',
+      `Lider: ${v.lider}`,
+      `Ticket: ${v.ticket}`,
+      'Abrangência problema:, MDU e vizinhos da rua',
+      `Telefone: ${v.telefone}`,
+      'Baixa: 203',
+      `TAP: ${v.tap}`,
+      `CA ${v.ca}`,
+      `CB ${v.cb}`,
+      `TX ${v.tx}`,
+      `RX ${v.rx}`
+    ];
+    if(v.mer) linhas.push(`MER: ${v.mer}`);
+    if(v.ber) linhas.push(`BER: ${v.ber}`);
+    linhas.push('OBS: rede externa sem sinal');
+    return linhas.join('\n');
+  },
+  problema_eletrico(v){
+    return `*PROBLEMA ELÉTRICO*\nFechamento: #PROBLEMA ELETRICO#\nNome: ${v.nome}\nTicket: ${v.ticket}\nPaliativo: ${v.paliativo}\nPrevisão: ${v.previsao}\nContato responsável: ${v.contato}`;
+  },
+  pedido_outage(v){
+    return `*PEDIDO DE OUTAGE*\nSolicitação: PEDIDO DE OUTAGE\nNome: ${v.nome}\nTelefone: ${v.telefone}\nContrato: ${v.contrato}\nAtuação: ${v.atuacao}`;
+  },
+  alocar_ticket(v){
+    return `*SOLICITAÇÃO DE TICKET*\nSolicitação: ALOCAR\nNome: ${v.nome}\nLogin: ${v.login}\nTicket: ${v.ticket}`;
+  },
+  tentativa_acesso(v){
+    return `*TENTATIVA DE ACESSO*\nSolicitação: SEM ACESSO/ ATIVO\nTécnico: ${v.tecnico}\nTicket: ${v.ticket}\nNíveis de Sinal na rede:\nCA ${v.ca}\nCB ${v.cb}\nTX ${v.tx}\nRX ${v.rx}`;
+  },
+  rede_externa_gpon(v){
+    return `#ENCAMINHADO REDE EXTERNA# GPON\nNome: ${v.nome}\nIncidente: ${v.incidente}\nTelefone: ${v.telefone}\nEndereço e identificação da caixa M: ${v.endereco}\nBaixa: ${v.baixa}\nAbrangência (MDU ou MDU E VIZINHOS): ${v.abrangencia}\nGrupo e cor da fibra com a medição: ${v.grupo_fibra}`;
+  },
+  baixa_improcedente(v){
+    return `*Baixa Improcedente 204/217*\nTicket: ${v.ticket}\nTecnico: ${v.tecnico}\nObservação: ${v.observacao}`;
+  },
+  sem_acesso_agendamento(v){
+    return `Solicitação: SEM ACESSO COM\nAGENDAMENTO\nTécnico: ${v.tecnico}\nTicket: ${v.ticket}\nOtg agendado para: ${v.otg}\nContato: ${v.contato}\nNíveis de Sinal na rede:\nCA ${v.ca}\nCB ${v.cb}\nTX ${v.tx}\nRX ${v.rx}\n\nObs: sem acesso ao DG`;
+  }
+};
+
+/* ============ RENDER: PERGUNTAS ============ */
+function labelDeCampo(key, campoKey){
+  const overrides = {
+    sem_acesso_agendamento: { contato:'Contato', otg:'Otg agendado para' }
+  };
+  if(overrides[key] && overrides[key][campoKey]) return overrides[key][campoKey];
+
+  const labels = {
+    tecnico:'Técnico', ticket:'Ticket', cod_baixa:'Cod_Baixa', descricao:'Descrição do Fechamento',
+    nome:'Nome', lider:'Lider', telefone:'Telefone', tap:'TAP', ca:'CA', cb:'CB', tx:'TX', rx:'RX',
+    mer:'MER', ber:'BER', paliativo:'Paliativo', previsao:'Previsão', contato:'Contato responsável',
+    contrato:'Contrato', atuacao:'Atuação', login:'Login', incidente:'Incidente',
+    endereco:'Endereço e identificação da caixa M', baixa:'Baixa', abrangencia:'Abrangência',
+    grupo_fibra:'Grupo e cor da fibra com a medição', observacao:'Observação'
+  };
+  return labels[campoKey] || campoKey;
+}
+
+function voltarPergunta(key){
+  const keys = Object.keys(state[key].values);
+  if(!keys.length) return;
+  const lastKey = keys[keys.length-1];
+  delete state[key].values[lastKey];
+  salvarRascunho(key);
+  renderPerguntas(key);
+}
+
+function responder(key, campoKey, tipo){
+  const val = document.getElementById('qinput').value.trim();
+  if(!val){ toast('Preencha antes de continuar'); return; }
+  state[key].values[campoKey] = val;
+  if(REPETIVEIS.includes(campoKey)) salvarUltimo(campoKey, val);
+  salvarRascunho(key);
+  renderPerguntas(key);
+}
+
+function pularCampo(key, campoKey){
+  state[key].values[campoKey] = '';
+  salvarRascunho(key);
+  renderPerguntas(key);
+}
+
+function renderPerguntas(key){
+  const st = state[key];
+  const campo = FLOWS[key](st.values);
+  const view = document.getElementById('view-'+key);
+
+  if(!campo){
+    st.step='final'; renderFinal(key); return;
+  }
+
+  const answeredKeys = Object.keys(st.values);
+  const total = TOTAL_CAMPOS[key];
+  const doneCount = answeredKeys.length;
+
+  let dots = '';
+  for(let i=0;i<total;i++) dots += `<i class="${i<doneCount?'done':''}"></i>`;
+
+  let answeredHtml = '';
+  if(doneCount){
+    answeredHtml = '<div class="answered-list">' + answeredKeys.map(k=>{
+      const label = labelDeCampo(key,k);
+      const valorExibido = st.values[k] === '' ? '(em branco)' : st.values[k];
+      return `<div class="answered-item"><b>${esc(label)}</b><span>${esc(valorExibido)}</span></div>`;
+    }).join('') + '</div>';
+  }
+
+  const isArea = campo.tipo==='area';
+  const isNum = campo.tipo==='numero';
+
+  const mostrarRecuperado = !!st._recuperado;
+  st._recuperado = false;
+  const bannerHtml = mostrarRecuperado
+    ? `<div class="draft-banner"><span>Rascunho recuperado, você pode continuar de onde parou.</span><button onclick="descartarRascunho('${key}')">Começar do zero</button></div>`
+    : '';
+
+  const uv = obterUltimos();
+  const chipHtml = (REPETIVEIS.includes(campo.key) && uv[campo.key])
+    ? `<button type="button" class="chip-repeat" onclick="repetirValor('${key}','${campo.key}')">↺ Repetir: ${esc(uv[campo.key])}</button>`
+    : '';
+
+  const temValidacao = ['contrato'].includes(campo.key);
+
+  view.innerHTML = `
+    <button class="back-btn" onclick="voltarHome('${key}')">‹ Voltar ao menu</button>
+    <div class="ticket">
+      <div class="ticket-head">
+        <h2>${NOMES[key]}</h2>
+        <div class="step-count">${doneCount+1}/${total}</div>
+      </div>
+      <div class="progress">${dots}</div>
+      ${bannerHtml}
+      ${answeredHtml}
+      <div class="q-label">Pergunta${campo.opcional ? ' (opcional)' : ''}</div>
+      <div class="q-text">${esc(campo.pergunta)}</div>
+      ${isArea
+        ? `<textarea id="qinput" autofocus></textarea>`
+        : `<input id="qinput" type="${isNum?'number':'text'}" inputmode="${isNum?'numeric':'text'}" autofocus>`}
+      ${temValidacao ? `<div class="fmt-warn" id="fmtWarn"></div>` : ''}
+      ${campo.opcional ? `<div class="opt-note">Pode deixar em branco e pular, se não tiver essa informação.</div>` : ''}
+      ${chipHtml}
+      <div class="btnrow">
+        ${doneCount>0 ? `<button class="btn-ghost" onclick="voltarPergunta('${key}')">‹ Voltar</button>` : ''}
+        ${campo.opcional ? `<button class="btn-ghost" onclick="pularCampo('${key}','${campo.key}')">Pular</button>` : ''}
+        <button class="btn-primary" onclick="responder('${key}','${campo.key}','${campo.tipo}')">Continuar</button>
+      </div>
+    </div>
+  `;
+
+  const inputEl = document.getElementById('qinput');
+  if(temValidacao){
+    const fmtDiv = document.getElementById('fmtWarn');
+    inputEl.addEventListener('input', ()=>{
+      const msg = avisoFormato(campo.key, inputEl.value.trim());
+      fmtDiv.textContent = msg;
+      fmtDiv.classList.toggle('show', !!msg);
+    });
+  }
+  if(!isArea){
+    inputEl.addEventListener('keydown', e=>{
+      if(e.key==='Enter'){ e.preventDefault(); responder(key, campo.key, campo.tipo); }
+    });
+  }
+  setTimeout(()=>inputEl.focus(), 30);
+}
+
+/* ============ RENDER: FINAL ============ */
+function renderFinal(key){
+  const st = state[key];
+  const texto = TEMPLATES[key](st.values);
+  const view = document.getElementById('view-'+key);
+
+  salvarHistorico(NOMES[key], texto);
+  limparRascunho(key);
+
+  view.innerHTML = `
+    <button class="back-btn" onclick="voltarHome('${key}')">‹ Voltar ao menu</button>
+    <div class="ticket">
+      <div class="ticket-head"><h2>${NOMES[key]}</h2><div class="step-count">pronto</div></div>
+      <div class="report-box" id="reportBox">${esc(texto)}</div>
+      <div class="btnrow">
+        <button class="btn-primary" onclick="copiar(TEMPLATES['${key}'](state['${key}'].values))">Copiar texto</button>
+        <button class="btn-ghost" onclick="voltarHome('${key}')">Nova consulta</button>
+      </div>
+      <div class="hint">Copie o texto e cole onde precisar.</div>
+    </div>
+  `;
+}
+
+aplicarTema();
+
+</script>
+</body>
+</html>
